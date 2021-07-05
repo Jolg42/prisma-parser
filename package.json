@@ -1,0 +1,28 @@
+{
+  "name": "prisma-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "typings/index.d.ts",
+  "files": [
+    "lib",
+    "typings"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Sergey Tatarintsev <sergey@tatarintsev.me> (https://github.com/SevInf)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "@typescript-eslint/eslint-plugin": "^4.28.1",
+    "@typescript-eslint/parser": "^4.28.1",
+    "eslint": "^7.30.0",
+    "jest": "^27.0.6",
+    "prettier": "^2.3.2",
+    "typescript": "^4.3.5",
+    "ts-jest": "^27.0.3"
+  }
+}
