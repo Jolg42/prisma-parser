@@ -21,14 +21,14 @@ describe('tokenization', () => {
     expect(tokens.advance()).toEqual({ type: '}', token: '}', start: 0, end: 1 })
   })
 
-  test('recognizes opening square brace', () => {
-    const tokens = new TokenList('[')
-    expect(tokens.advance()).toEqual({ type: '[', token: '[', start: 0, end: 1 })
+  test('recognizes square braces', () => {
+    const tokens = new TokenList('[]')
+    expect(tokens.advance()).toEqual({ type: '[]', token: '[]', start: 0, end: 2 })
   })
 
-  test('recognizes closing square brace', () => {
-    const tokens = new TokenList(']')
-    expect(tokens.advance()).toEqual({ type: ']', token: ']', start: 0, end: 1 })
+  test('recognizes question mark', () => {
+    const tokens = new TokenList('[]')
+    expect(tokens.advance()).toEqual({ type: '[]', token: '[]', start: 0, end: 2 })
   })
 
   test('ignores spaces', () => {

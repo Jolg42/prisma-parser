@@ -1,4 +1,4 @@
-export type TokenType = 'identifier' | 'attribute' | 'eof' | '{' | '}' | ']' | '['
+export type TokenType = 'identifier' | 'attribute' | 'eof' | '{' | '}' | '[]' | '?'
 
 export type Token = {
   type: TokenType
@@ -17,8 +17,8 @@ const tokenizationRules: TokenizationRule[] = [
   { type: 'attribute', pattern: /@[a-zA-Z][a-zA-Z0-9]*/y },
   { type: '{', pattern: /{/y },
   { type: '}', pattern: /}/y },
-  { type: ']', pattern: /]/y },
-  { type: '[', pattern: /\[/y },
+  { type: '?', pattern: /\?/y },
+  { type: '[]', pattern: /\[]/y },
 ]
 
 const SPACE_REGEX = /[\s\n\r]+/y

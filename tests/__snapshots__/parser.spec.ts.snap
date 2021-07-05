@@ -1,0 +1,639 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`allows to use "model" as a field name 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [
+        Object {
+          "attributes": Array [],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 37,
+            "start": 25,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 30,
+              "start": 25,
+            },
+            "name": "model",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 37,
+              "start": 31,
+            },
+            "modifier": "none",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 37,
+                "start": 31,
+              },
+              "name": "String",
+            },
+          },
+        },
+      ],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 43,
+        "start": 5,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 14,
+          "start": 11,
+        },
+        "name": "Car",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 43,
+    "start": 5,
+  },
+}
+`;
+
+exports[`parses array field 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [
+        Object {
+          "attributes": Array [],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 29,
+            "start": 21,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 23,
+              "start": 21,
+            },
+            "name": "id",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 29,
+              "start": 24,
+            },
+            "modifier": "array",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 27,
+                "start": 24,
+              },
+              "name": "Int",
+            },
+          },
+        },
+      ],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 33,
+        "start": 3,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 12,
+          "start": 9,
+        },
+        "name": "Foo",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 33,
+    "start": 3,
+  },
+}
+`;
+
+exports[`parses attribute 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [
+        Object {
+          "attributes": Array [
+            Object {
+              "kind": "Attribute",
+              "location": Object {
+                "end": 31,
+                "start": 28,
+              },
+              "name": "@id",
+            },
+          ],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 31,
+            "start": 21,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 23,
+              "start": 21,
+            },
+            "name": "id",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 27,
+              "start": 24,
+            },
+            "modifier": "none",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 27,
+                "start": 24,
+              },
+              "name": "Int",
+            },
+          },
+        },
+      ],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 35,
+        "start": 3,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 12,
+          "start": 9,
+        },
+        "name": "Foo",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 35,
+    "start": 3,
+  },
+}
+`;
+
+exports[`parses empty model definition 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 12,
+        "start": 0,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 9,
+          "start": 6,
+        },
+        "name": "Foo",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 12,
+    "start": 0,
+  },
+}
+`;
+
+exports[`parses multiple attributes 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [
+        Object {
+          "attributes": Array [
+            Object {
+              "kind": "Attribute",
+              "location": Object {
+                "end": 31,
+                "start": 28,
+              },
+              "name": "@id",
+            },
+            Object {
+              "kind": "Attribute",
+              "location": Object {
+                "end": 37,
+                "start": 32,
+              },
+              "name": "@more",
+            },
+            Object {
+              "kind": "Attribute",
+              "location": Object {
+                "end": 49,
+                "start": 38,
+              },
+              "name": "@attributes",
+            },
+          ],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 49,
+            "start": 21,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 23,
+              "start": 21,
+            },
+            "name": "id",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 27,
+              "start": 24,
+            },
+            "modifier": "none",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 27,
+                "start": 24,
+              },
+              "name": "Int",
+            },
+          },
+        },
+      ],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 53,
+        "start": 3,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 12,
+          "start": 9,
+        },
+        "name": "Foo",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 53,
+    "start": 3,
+  },
+}
+`;
+
+exports[`parses multiple fields 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [
+        Object {
+          "attributes": Array [
+            Object {
+              "kind": "Attribute",
+              "location": Object {
+                "end": 32,
+                "start": 29,
+              },
+              "name": "@id",
+            },
+          ],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 32,
+            "start": 22,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 24,
+              "start": 22,
+            },
+            "name": "id",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 28,
+              "start": 25,
+            },
+            "modifier": "none",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 28,
+                "start": 25,
+              },
+              "name": "Int",
+            },
+          },
+        },
+        Object {
+          "attributes": Array [],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 51,
+            "start": 39,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 44,
+              "start": 39,
+            },
+            "name": "posts",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 51,
+              "start": 45,
+            },
+            "modifier": "array",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 49,
+                "start": 45,
+              },
+              "name": "Post",
+            },
+          },
+        },
+        Object {
+          "attributes": Array [],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 69,
+            "start": 58,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 62,
+              "start": 58,
+            },
+            "name": "name",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 69,
+              "start": 63,
+            },
+            "modifier": "none",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 69,
+                "start": 63,
+              },
+              "name": "String",
+            },
+          },
+        },
+        Object {
+          "attributes": Array [],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 94,
+            "start": 76,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 86,
+              "start": 76,
+            },
+            "name": "occupation",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 94,
+              "start": 87,
+            },
+            "modifier": "optional",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 93,
+                "start": 87,
+              },
+              "name": "String",
+            },
+          },
+        },
+      ],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 98,
+        "start": 3,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 13,
+          "start": 9,
+        },
+        "name": "User",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 98,
+    "start": 3,
+  },
+}
+`;
+
+exports[`parses multiple model definitions 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 13,
+        "start": 1,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 10,
+          "start": 7,
+        },
+        "name": "Foo",
+      },
+    },
+    Object {
+      "fields": Array [],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 26,
+        "start": 14,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 23,
+          "start": 20,
+        },
+        "name": "Bar",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 26,
+    "start": 1,
+  },
+}
+`;
+
+exports[`parses optional field 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [
+        Object {
+          "attributes": Array [],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 28,
+            "start": 21,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 23,
+              "start": 21,
+            },
+            "name": "id",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 28,
+              "start": 24,
+            },
+            "modifier": "optional",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 27,
+                "start": 24,
+              },
+              "name": "Int",
+            },
+          },
+        },
+      ],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 32,
+        "start": 3,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 12,
+          "start": 9,
+        },
+        "name": "Foo",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 32,
+    "start": 3,
+  },
+}
+`;
+
+exports[`parses simple field 1`] = `
+Object {
+  "definitions": Array [
+    Object {
+      "fields": Array [
+        Object {
+          "attributes": Array [],
+          "kind": "FieldDefinition",
+          "location": Object {
+            "end": 27,
+            "start": 21,
+          },
+          "name": Object {
+            "kind": "Identifier",
+            "location": Object {
+              "end": 23,
+              "start": 21,
+            },
+            "name": "id",
+          },
+          "type": Object {
+            "kind": "Type",
+            "location": Object {
+              "end": 27,
+              "start": 24,
+            },
+            "modifier": "none",
+            "name": Object {
+              "kind": "Identifier",
+              "location": Object {
+                "end": 27,
+                "start": 24,
+              },
+              "name": "Int",
+            },
+          },
+        },
+      ],
+      "kind": "ModelDefinition",
+      "location": Object {
+        "end": 31,
+        "start": 3,
+      },
+      "name": Object {
+        "kind": "Identifier",
+        "location": Object {
+          "end": 12,
+          "start": 9,
+        },
+        "name": "Foo",
+      },
+    },
+  ],
+  "kind": "Document",
+  "location": Object {
+    "end": 31,
+    "start": 3,
+  },
+}
+`;
