@@ -145,7 +145,7 @@ const parseType = defineRule<TypeNode>((state) => {
   if (!name) {
     return null
   }
-  let start = name.location.start
+  const start = name.location.start
   let end = name.location.end
 
   let modifier: TypeModifier = 'none'

@@ -10,7 +10,11 @@
   ],
   "scripts": {
     "build": "tsc --build",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint . --ext ts",
+    "prepare": "husky install",
+    "format": "prettier --write .",
+    "precommit": "prettier --check . && npm run lint && npm test"
   },
   "keywords": [],
   "author": "Sergey Tatarintsev <sergey@tatarintsev.me> (https://github.com/SevInf)",
@@ -20,9 +24,10 @@
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
     "eslint": "^7.30.0",
+    "husky": "^7.0.1",
     "jest": "^27.0.6",
     "prettier": "^2.3.2",
-    "typescript": "^4.3.5",
-    "ts-jest": "^27.0.3"
+    "ts-jest": "^27.0.3",
+    "typescript": "^4.3.5"
   }
 }
