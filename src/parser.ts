@@ -27,12 +27,12 @@ class ParserState {
     return this.tokenList.peek()
   }
 
-  getPosition(): number {
-    return this.tokenList.getPosition()
+  getPointer(): number {
+    return this.tokenList.getPointer()
   }
 
-  restorePosition(position: number): void {
-    return this.tokenList.restorePosition(position)
+  restorePointer(position: number): void {
+    return this.tokenList.restorePointer(position)
   }
 
   error<T>(message: string, position: Position): ParsingResult<T> {
@@ -40,7 +40,7 @@ class ParserState {
   }
 }
 
-const attribute = defineNode(token('attribute'), (token) => ({
+const attribute = defineNodeRule(token('attribute'), (token) => ({
   kind: 'Attribute',
   name: token.token,
   location: {
@@ -49,7 +49,7 @@ const attribute = defineNode(token('attribute'), (token) => ({
   },
 }))
 
-const identifier = defineNode(token('identifier'), (token) => ({
+const identifier = defineNodeRule(token('identifier'), (token) => ({
   kind: 'Identifier',
   identifier: token.token,
   location: {
@@ -62,7 +62,7 @@ const typeModifierToken = defineRule<Token | null>((state) => {
   return (optionalToken(state) as ParsingResult<Token | null>).orElse(() => arrayToken(state)).orElse(() => ok(null))
 })
 
-const type = defineNode(
+const type = defineNodeRule(
   sequence(changeErrorMessage(identifier, 'Expected field type'), typeModifierToken),
   ([name, modifierToken]) => {
     let modifier: TypeModifier = 'none'
@@ -84,7 +84,7 @@ const type = defineNode(
   },
 )
 
-const fieldDefinition = defineNode(
+const fieldDefinition = defineNodeRule(
   sequence(changeErrorMessage(identifier, 'Expected field name'), type, zeroOrMore(attribute)),
   ([name, type, attributes]) => {
     const end = attributes.length > 0 ? attributes[attributes.length - 1].location.end : type.location.end
@@ -101,7 +101,7 @@ const fieldDefinition = defineNode(
   },
 )
 
-const modelDefinition = defineNode(
+const modelDefinition = defineNodeRule(
   sequence(
     keyword('model'),
     changeErrorMessage(identifier, 'Expected model name'),
@@ -119,7 +119,7 @@ const modelDefinition = defineNode(
   }),
 )
 
-const document = defineNode(takeUntil(modelDefinition, 'eof'), ([definitions, eof]) => ({
+const document = defineNodeRule(takeUntil(modelDefinition, 'eof'), ([definitions, eof]) => ({
   kind: 'Document',
   definitions,
   location: {
@@ -197,7 +197,7 @@ function token(tokenType: TokenType): RuleFunction<Token> {
   })
 }
 
-function defineNode<T, NodeType extends Node>(
+function defineNodeRule<T, NodeType extends Node>(
   ruleFn: RuleFunction<T>,
   toNodeFn: (result: T) => NodeType,
 ): RuleFunction<NodeType> {
@@ -214,10 +214,10 @@ function changeErrorMessage<T>(ruleFn: RuleFunction<T>, message: string): RuleFu
 
 function defineRule<ReturnType>(ruleFn: RuleFunction<ReturnType>): RuleFunction<ReturnType> {
   return (tokenList) => {
-    const position = tokenList.getPosition()
+    const position = tokenList.getPointer()
     const result = ruleFn(tokenList)
     if (result.isError()) {
-      tokenList.restorePosition(position)
+      tokenList.restorePointer(position)
     }
     return result
   }

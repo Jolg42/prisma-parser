@@ -96,11 +96,11 @@ describe('tokenization', () => {
   })
 })
 
-describe('position manipulation methods', () => {
-  test('.advance advances the position', () => {
+describe('pointer manipulation methods', () => {
+  test('.advance advances the pointer', () => {
     const tokens = new TokenList('foo')
     tokens.advance()
-    expect(tokens.getPosition()).toBe(1)
+    expect(tokens.getPointer()).toBe(1)
   })
 
   test('.peek returns current token', () => {
@@ -108,16 +108,16 @@ describe('position manipulation methods', () => {
     expect(tokens.peek()).toEqual({ type: 'identifier', token: 'foo', start: documentStart, end: firstLinePosition(3) })
   })
 
-  test('.peek does not advance current position', () => {
+  test('.peek does not advance pointer', () => {
     const tokens = new TokenList('foo')
     tokens.peek()
-    expect(tokens.getPosition()).toBe(0)
+    expect(tokens.getPointer()).toBe(0)
   })
 
-  test('.restorePosition allows to go back to previous token', () => {
+  test('.restorePointer allows to go back to previous token', () => {
     const tokens = new TokenList('foo')
     tokens.advance()
-    tokens.restorePosition(0)
+    tokens.restorePointer(0)
     expect(tokens.advance()).toEqual({
       type: 'identifier',
       token: 'foo',
@@ -126,8 +126,8 @@ describe('position manipulation methods', () => {
     })
   })
 
-  test('.restorePosition throws if trying to go beyond currently computed tokens', () => {
+  test('.restorePointer throws if trying to go beyond currently computed tokens', () => {
     const tokens = new TokenList('foo')
-    expect(() => tokens.restorePosition(9000)).toThrow('Attempt to set position to a not yet computed toke')
+    expect(() => tokens.restorePointer(9000)).toThrow('Attempt to set pointer to a not yet computed toke')
   })
 })

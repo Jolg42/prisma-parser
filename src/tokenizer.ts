@@ -99,7 +99,7 @@ function createLazyTokenizer(input: string): () => Token {
 }
 
 export class TokenList {
-  private currentPosition = 0
+  private currentTokenPointer = 0
   private computedTokens: Token[] = []
   private computeNextToken: LazyTokenizer
 
@@ -107,28 +107,28 @@ export class TokenList {
     this.computeNextToken = createLazyTokenizer(input)
   }
 
-  getPosition(): number {
-    return this.currentPosition
+  getPointer(): number {
+    return this.currentTokenPointer
   }
 
-  restorePosition(position: number): void {
-    if (position >= this.computedTokens.length) {
-      throw new Error('Attempt to set position to a not yet computed token')
+  restorePointer(pointer: number): void {
+    if (pointer >= this.computedTokens.length) {
+      throw new Error('Attempt to set pointer to a not yet computed token')
     }
 
-    this.currentPosition = position
+    this.currentTokenPointer = pointer
   }
 
   advance(): Token {
     const token = this.peek()
-    this.currentPosition++
+    this.currentTokenPointer++
     return token
   }
 
   peek(): Token {
-    if (this.currentPosition === this.computedTokens.length) {
+    if (this.currentTokenPointer === this.computedTokens.length) {
       this.computedTokens.push(this.computeNextToken())
     }
-    return this.computedTokens[this.currentPosition]
+    return this.computedTokens[this.currentTokenPointer]
   }
 }
