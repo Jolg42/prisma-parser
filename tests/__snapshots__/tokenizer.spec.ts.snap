@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`tokenization throws error on unexpected token 1`] = `
+"PrismaParsingError: Unexpected token
+
+> 1 | ß
+    | ^
+"
+`;

@@ -1,10 +1,15 @@
+import { Position } from './ast'
+import { PrismaParsingError } from './prisma-parsing-error'
+
 export type TokenType = 'identifier' | 'attribute' | 'eof' | '{' | '}' | '[]' | '?'
 
 export type Token = {
   type: TokenType
   token: string
-  start: number
-  end: number
+  start: Position
+  end: Position
+  // start: number
+  // end: number
 }
 
 type TokenizationRule = {
@@ -26,36 +31,60 @@ const SPACE_REGEX = /[\s\n\r]+/y
 type LazyTokenizer = () => Token
 
 function createLazyTokenizer(input: string): () => Token {
-  let offset = 0
+  let position: Position = {
+    offset: 0,
+    line: 1,
+    column: 1,
+  }
+
+  const advancePosition = (byOffset: number): Position => {
+    const offset = position.offset + byOffset
+    let column = position.column
+    let line = position.line
+    for (let i = position.offset; i < offset; i++) {
+      if (input[i] === '\n') {
+        line++
+        column = 1
+      } else {
+        column++
+      }
+    }
+
+    return {
+      offset,
+      line,
+      column,
+    }
+  }
 
   const consumeSpace = () => {
-    SPACE_REGEX.lastIndex = offset
+    SPACE_REGEX.lastIndex = position.offset
     const spaceMatch = SPACE_REGEX.exec(input)
     if (spaceMatch) {
-      offset += spaceMatch[0].length
+      position = advancePosition(spaceMatch[0].length)
     }
   }
 
   return (): Token => {
     consumeSpace()
-    if (offset === input.length) {
+    if (position.offset === input.length) {
       return {
         type: 'eof',
         token: '',
-        start: offset,
-        end: offset,
+        start: position,
+        end: position,
       }
     }
     for (const rule of tokenizationRules) {
-      rule.pattern.lastIndex = offset
+      rule.pattern.lastIndex = position.offset
       const match = rule.pattern.exec(input)
       if (!match) {
         continue
       }
       const token = match[0]
-      const start = offset
-      const end = offset + token.length
-      offset = end
+      const start = position
+      const end = advancePosition(token.length)
+      position = end
 
       return {
         type: rule.type,
@@ -65,8 +94,7 @@ function createLazyTokenizer(input: string): () => Token {
       }
     }
 
-    // TODO: better error messages
-    throw new Error(`Unexpected token at ${offset}`)
+    throw new PrismaParsingError('Unexpected token', input, position)
   }
 }
 

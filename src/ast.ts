@@ -1,8 +1,14 @@
 export type Node = DocumentNode | ModelDefinitionNode | FieldDefinitionNode | TypeNode | IdentifierNode | AttributeNode
 
+export type Position = {
+  line: number
+  column: number
+  offset: number
+}
+
 export type Location = {
-  start: number
-  end: number
+  start: Position
+  end: Position
 }
 
 export type DocumentNode = {
@@ -37,7 +43,7 @@ export type TypeNode = {
 
 export type IdentifierNode = {
   kind: 'Identifier'
-  name: string
+  identifier: string
   location: Location
 }
 

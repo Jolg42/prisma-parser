@@ -1,9 +1,15 @@
 import { parse } from '../src/parser'
+import { expectParsingError, loadPrismaFixture } from './util'
 
 test('parses empty model definition', () => {
   const doc = parse(`model Foo {}`)
 
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions).toMatchObject([
+    {
+      name: { identifier: 'Foo' },
+      fields: [],
+    },
+  ])
 })
 
 test('parses multiple model definitions', () => {
@@ -12,7 +18,7 @@ model Foo {}
 model Bar {}
 `)
 
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions).toMatchObject([{ name: { identifier: 'Foo' } }, { name: { identifier: 'Bar' } }])
 })
 
 test('parses simple field', () => {
@@ -21,7 +27,20 @@ test('parses simple field', () => {
       id Int
   }`)
 
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions[0].fields).toHaveLength(1)
+  const field = doc.definitions[0].fields[0]
+  expect(field).toMatchObject({
+    name: {
+      identifier: 'id',
+    },
+    type: {
+      name: {
+        identifier: 'Int',
+      },
+      modifier: 'none',
+    },
+    attributes: [],
+  })
 })
 
 test('parses array field', () => {
@@ -30,7 +49,7 @@ test('parses array field', () => {
       id Int[]
   }`)
 
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions[0].fields[0].type.modifier).toBe('array')
 })
 
 test('parses optional field', () => {
@@ -39,7 +58,7 @@ test('parses optional field', () => {
       id Int?
   }`)
 
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions[0].fields[0].type.modifier).toBe('optional')
 })
 
 test('parses attribute', () => {
@@ -48,7 +67,9 @@ test('parses attribute', () => {
       id Int @id
   }`)
 
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions[0].fields[0].attributes).toHaveLength(1)
+  const attribute = doc.definitions[0].fields[0].attributes[0]
+  expect(attribute.name).toBe('@id')
 })
 
 test('parses multiple attributes', () => {
@@ -57,7 +78,11 @@ test('parses multiple attributes', () => {
       id Int @id @more @attributes
   }`)
 
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions[0].fields[0].attributes).toMatchObject([
+    { name: '@id' },
+    { name: '@more' },
+    { name: '@attributes' },
+  ])
 })
 
 test('parses multiple fields', () => {
@@ -69,7 +94,12 @@ test('parses multiple fields', () => {
       occupation String?
   }`)
 
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions[0].fields).toMatchObject([
+    { name: { identifier: 'id' } },
+    { name: { identifier: 'posts' } },
+    { name: { identifier: 'name' } },
+    { name: { identifier: 'occupation' } },
+  ])
 })
 
 test('allows to use "model" as a field name', () => {
@@ -78,55 +108,60 @@ test('allows to use "model" as a field name', () => {
         model String
     }
     `)
-  expect(doc).toMatchSnapshot()
+  expect(doc.definitions[0].fields[0].name.identifier).toBe('model')
+})
+
+test('parses prisma example schema', async () => {
+  const schema = await loadPrismaFixture()
+  expect(parse(schema)).toMatchSnapshot()
 })
 
 describe('errors', () => {
   test('throws error on incomplete document', () => {
-    expect(() =>
+    expectParsingError(() =>
       parse(`
       model Foo {
         `),
-    ).toThrow('Expected } or field definition')
+    )
   })
 
   test('throws error on incomplete field definition', () => {
-    expect(() =>
+    expectParsingError(() =>
       parse(`
       model Foo {
           name
       }
         `),
-    ).toThrow('Expected field type')
+    )
   })
 
   test('throws error on unexpected token', () => {
-    expect(() =>
+    expectParsingError(() =>
       parse(`
       model Foo [
           name Int
       ]
         `),
-    ).toThrow('Unexpected token')
+    )
   })
 
   test('throws error on missing {', () => {
-    expect(() =>
+    expectParsingError(() =>
       parse(`
       model Foo @attr {
         name Int
       }
         `),
-    ).toThrow('Expected {')
+    )
   })
 
   test('throws error on missing model name', () => {
-    expect(() =>
+    expectParsingError(() =>
       parse(`
       model {
         name Int
       }
         `),
-    ).toThrow('Expected model name')
+    )
   })
 })
