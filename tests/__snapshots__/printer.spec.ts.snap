@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`prints empty document 1`] = `""`;
+
+exports[`prints empty model 1`] = `
+"model Model {
+  
+}
+"
+`;
+
+exports[`prints field 1`] = `
+"model Model {
+  field  Int
+}
+"
+`;
+
+exports[`prints field attribute 1`] = `
+"model Model {
+  id  Int @id
+}
+"
+`;
+
+exports[`prints field with array type 1`] = `
+"model Model {
+  array  Int[]
+}
+"
+`;
+
+exports[`prints field with optional type 1`] = `
+"model Model {
+  array  Int?
+}
+"
+`;
+
+exports[`prints multiple attributes 1`] = `
+"model Model {
+  field  Int @first @second
+}
+"
+`;
+
+exports[`prints multiple fields while aligning the types 1`] = `
+"model Model {
+  short    Int
+  loooong  String
+}
+"
+`;

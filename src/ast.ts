@@ -14,14 +14,14 @@ export type Location = {
 export type DocumentNode = {
   kind: 'Document'
   definitions: ModelDefinitionNode[]
-  location: Location
+  location?: Location
 }
 
 export type ModelDefinitionNode = {
   kind: 'ModelDefinition'
   name: IdentifierNode
   fields: FieldDefinitionNode[]
-  location: Location
+  location?: Location
 }
 
 export type FieldDefinitionNode = {
@@ -29,7 +29,7 @@ export type FieldDefinitionNode = {
   name: IdentifierNode
   type: TypeNode
   attributes: AttributeNode[]
-  location: Location
+  location?: Location
 }
 
 export type TypeModifier = 'none' | 'array' | 'optional'
@@ -38,17 +38,17 @@ export type TypeNode = {
   kind: 'Type'
   name: IdentifierNode
   modifier: TypeModifier
-  location: Location
+  location?: Location
 }
 
 export type IdentifierNode = {
   kind: 'Identifier'
   identifier: string
-  location: Location
+  location?: Location
 }
 
 export type AttributeNode = {
   kind: 'Attribute'
   name: string
-  location: Location
+  location?: Location
 }
