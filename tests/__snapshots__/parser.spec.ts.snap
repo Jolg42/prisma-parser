@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`errors throws error on incomplete config definition 1`] = `
+"PrismaParsingError: Expected identifier
+
+  1 | 
+  2 |       generator client {
+> 3 |         
+    |         ^
+"
+`;
+
 exports[`errors throws error on incomplete document 1`] = `
 "PrismaParsingError: Expected field name
 
@@ -29,6 +39,17 @@ exports[`errors throws error on missing { 1`] = `
     |                 ^
   3 |         name Int
   4 |       }
+  5 |         
+"
+`;
+
+exports[`errors throws error on missing config value 1`] = `
+"PrismaParsingError: Expected value
+
+  2 |       datasource db1 {
+  3 |         option =
+> 4 |       }
+    |       ^
   5 |         
 "
 `;

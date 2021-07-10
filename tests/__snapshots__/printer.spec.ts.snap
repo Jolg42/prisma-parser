@@ -1,6 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`correctly escapes quotes in string values 1`] = `
+"generator client {
+  option = \\"option \\\\\\"value\\\\\\"\\"
+}
+"
+`;
+
+exports[`prints boolean false option 1`] = `
+"datasource db1 {
+  option = false
+}
+"
+`;
+
+exports[`prints boolean true option 1`] = `
+"datasource db1 {
+  option = true
+}
+"
+`;
+
+exports[`prints empty datasource definition 1`] = `
+"datasource db1 {
+  
+}
+"
+`;
+
 exports[`prints empty document 1`] = `""`;
+
+exports[`prints empty generator definition 1`] = `
+"generator client {
+  
+}
+"
+`;
 
 exports[`prints empty model 1`] = `
 "model Model {
@@ -48,6 +83,21 @@ exports[`prints multiple fields while aligning the types 1`] = `
 "model Model {
   short    Int
   loooong  String
+}
+"
+`;
+
+exports[`prints multiple options 1`] = `
+"datasource db1 {
+  option1 = false
+  option2 = \\"some option\\"
+}
+"
+`;
+
+exports[`prints string option 1`] = `
+"generator client {
+  option = \\"option value\\"
 }
 "
 `;

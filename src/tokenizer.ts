@@ -1,7 +1,7 @@
 import { Position } from './ast'
 import { PrismaParsingError } from './prisma-parsing-error'
 
-export type TokenType = 'identifier' | 'attribute' | 'eof' | '{' | '}' | '[]' | '?'
+export type TokenType = 'identifier' | 'attribute' | 'string' | 'eof' | '{' | '}' | '[]' | '?' | '='
 
 export type Token = {
   type: TokenType
@@ -20,9 +20,14 @@ type TokenizationRule = {
 const tokenizationRules: TokenizationRule[] = [
   { type: 'identifier', pattern: /[a-zA-Z][a-zA-Z0-9]*/y },
   { type: 'attribute', pattern: /@[a-zA-Z][a-zA-Z0-9]*/y },
+  // eslint is wrong: \" is not an escape sequence, it is supposed to match
+  // \ and " characters and \ does not need escaping in this case
+  // eslint-disable-next-line no-useless-escape
+  { type: 'string', pattern: /"([^"]|\")*"/y },
   { type: '{', pattern: /{/y },
   { type: '}', pattern: /}/y },
   { type: '?', pattern: /\?/y },
+  { type: '=', pattern: /=/y },
   { type: '[]', pattern: /\[]/y },
 ]
 

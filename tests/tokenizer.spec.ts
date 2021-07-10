@@ -25,6 +25,26 @@ describe('tokenization', () => {
     })
   })
 
+  test('recognizes strings', () => {
+    const tokens = new TokenList('"some string"')
+    expect(tokens.advance()).toEqual({
+      type: 'string',
+      token: '"some string"',
+      start: documentStart,
+      end: firstLinePosition(13),
+    })
+  })
+
+  test('allows to escape quotes inside of a string', () => {
+    const tokens = new TokenList('"some \\"string"')
+    expect(tokens.advance()).toEqual({
+      type: 'string',
+      token: '"some \\"string"',
+      start: documentStart,
+      end: firstLinePosition(15),
+    })
+  })
+
   test('recognizes opening curly brace', () => {
     const tokens = new TokenList('{')
     expect(tokens.advance()).toEqual({
@@ -53,6 +73,16 @@ describe('tokenization', () => {
   test('recognizes question mark', () => {
     const tokens = new TokenList('?')
     expect(tokens.advance()).toEqual({ type: '?', token: '?', start: documentStart, end: firstLinePosition(1) })
+  })
+
+  test('recognizes equals sign', () => {
+    const tokens = new TokenList('=')
+    expect(tokens.advance()).toEqual({
+      type: '=',
+      token: '=',
+      start: documentStart,
+      end: firstLinePosition(1),
+    })
   })
 
   test('ignores spaces', () => {

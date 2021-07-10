@@ -1,4 +1,12 @@
-export type Node = DocumentNode | ModelDefinitionNode | FieldDefinitionNode | TypeNode | IdentifierNode | AttributeNode
+export type Node =
+  | DocumentNode
+  | DefinitionNode
+  | FieldDefinitionNode
+  | TypeNode
+  | IdentifierNode
+  | AttributeNode
+  | ConfigOptionNode
+  | ValueNode
 
 export type Position = {
   line: number
@@ -13,7 +21,40 @@ export type Location = {
 
 export type DocumentNode = {
   kind: 'Document'
-  definitions: ModelDefinitionNode[]
+  definitions: DefinitionNode[]
+  location?: Location
+}
+
+export type DefinitionNode = ModelDefinitionNode | ConfigDefinitionNode
+
+export type ConfigDefinitionNode = {
+  kind: 'ConfigDefinition'
+  type: ConfigType
+  name: IdentifierNode
+  options: ConfigOptionNode[]
+  location?: Location
+}
+
+export type ConfigType = 'datasource' | 'generator'
+
+export type ConfigOptionNode = {
+  kind: 'ConfigOption'
+  key: IdentifierNode
+  value: ValueNode
+  location?: Location
+}
+
+export type ValueNode = StringLiteralNode | BooleanLiteralNode
+
+export type StringLiteralNode = {
+  kind: 'StringLiteral'
+  value: string
+  location?: Location
+}
+
+export type BooleanLiteralNode = {
+  kind: 'BooleanLiteral'
+  value: boolean
   location?: Location
 }
 

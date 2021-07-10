@@ -1,5 +1,14 @@
+import { ConfigDefinitionNode, DefinitionNode, ModelDefinitionNode } from '../src/ast'
 import { parse } from '../src/parser'
 import { expectParsingError, loadPrismaFixture } from './util'
+
+function expectModelDefinition(definition: DefinitionNode): asserts definition is ModelDefinitionNode {
+  expect(definition.kind).toBe('ModelDefinition')
+}
+
+function expectConfigDefinition(definition: DefinitionNode): asserts definition is ConfigDefinitionNode {
+  expect(definition.kind).toBe('ConfigDefinition')
+}
 
 test('parses empty model definition', () => {
   const doc = parse(`model Foo {}`)
@@ -27,6 +36,7 @@ test('parses simple field', () => {
       id Int
   }`)
 
+  expectModelDefinition(doc.definitions[0])
   expect(doc.definitions[0].fields).toHaveLength(1)
   const field = doc.definitions[0].fields[0]
   expect(field).toMatchObject({
@@ -49,6 +59,7 @@ test('parses array field', () => {
       id Int[]
   }`)
 
+  expectModelDefinition(doc.definitions[0])
   expect(doc.definitions[0].fields[0].type.modifier).toBe('array')
 })
 
@@ -58,6 +69,7 @@ test('parses optional field', () => {
       id Int?
   }`)
 
+  expectModelDefinition(doc.definitions[0])
   expect(doc.definitions[0].fields[0].type.modifier).toBe('optional')
 })
 
@@ -67,6 +79,7 @@ test('parses attribute', () => {
       id Int @id
   }`)
 
+  expectModelDefinition(doc.definitions[0])
   expect(doc.definitions[0].fields[0].attributes).toHaveLength(1)
   const attribute = doc.definitions[0].fields[0].attributes[0]
   expect(attribute.name).toBe('@id')
@@ -78,6 +91,7 @@ test('parses multiple attributes', () => {
       id Int @id @more @attributes
   }`)
 
+  expectModelDefinition(doc.definitions[0])
   expect(doc.definitions[0].fields[0].attributes).toMatchObject([
     { name: '@id' },
     { name: '@more' },
@@ -94,6 +108,7 @@ test('parses multiple fields', () => {
       occupation String?
   }`)
 
+  expectModelDefinition(doc.definitions[0])
   expect(doc.definitions[0].fields).toMatchObject([
     { name: { identifier: 'id' } },
     { name: { identifier: 'posts' } },
@@ -108,7 +123,155 @@ test('allows to use "model" as a field name', () => {
         model String
     }
     `)
+  expectModelDefinition(doc.definitions[0])
   expect(doc.definitions[0].fields[0].name.identifier).toBe('model')
+})
+
+test('parses empty datasource definition', () => {
+  const doc = parse(`
+  datasource db1 {
+  }
+  `)
+
+  expect(doc.definitions).toMatchObject([
+    {
+      kind: 'ConfigDefinition',
+      type: 'datasource',
+      name: { identifier: 'db1' },
+      options: [],
+    },
+  ])
+})
+
+test('parses empty generator definition', () => {
+  const doc = parse(`
+  generator client {
+  }
+  `)
+
+  expect(doc.definitions).toMatchObject([
+    {
+      kind: 'ConfigDefinition',
+      type: 'generator',
+      name: { identifier: 'client' },
+      options: [],
+    },
+  ])
+})
+
+test('parses config option with true value', () => {
+  const doc = parse(`
+  datasource db1 {
+    option = true
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option' },
+      value: {
+        kind: 'BooleanLiteral',
+        value: true,
+      },
+    },
+  ])
+})
+
+test('parses config option with false value', () => {
+  const doc = parse(`
+  datasource db1 {
+    option = false
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option' },
+      value: {
+        kind: 'BooleanLiteral',
+        value: false,
+      },
+    },
+  ])
+})
+
+test('parses config option with string value', () => {
+  const doc = parse(`
+  datasource db1 {
+    option = "some value"
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option' },
+      value: {
+        kind: 'StringLiteral',
+        value: 'some value',
+      },
+    },
+  ])
+})
+
+test('correctly unescapes the quotes in string literal', () => {
+  const doc = parse(`
+  generator client {
+    option = "some \\"value\\""
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option' },
+      value: {
+        kind: 'StringLiteral',
+        value: 'some "value"',
+      },
+    },
+  ])
+})
+
+test('parses multiple options', () => {
+  const doc = parse(`
+  datasource db1 {
+    option1 = true
+    option2 = "value"
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option1' },
+      value: {
+        kind: 'BooleanLiteral',
+        value: true,
+      },
+    },
+
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option2' },
+      value: {
+        kind: 'StringLiteral',
+        value: 'value',
+      },
+    },
+  ])
 })
 
 test('parses prisma example schema', async () => {
@@ -121,6 +284,14 @@ describe('errors', () => {
     expectParsingError(() =>
       parse(`
       model Foo {
+        `),
+    )
+  })
+
+  test('throws error on incomplete config definition', () => {
+    expectParsingError(() =>
+      parse(`
+      generator client {
         `),
     )
   })
@@ -160,6 +331,16 @@ describe('errors', () => {
       parse(`
       model {
         name Int
+      }
+        `),
+    )
+  })
+
+  test('throws error on missing config value', () => {
+    expectParsingError(() =>
+      parse(`
+      datasource db1 {
+        option =
       }
         `),
     )

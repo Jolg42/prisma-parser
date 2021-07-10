@@ -1,6 +1,6 @@
 import { Result, ok, err } from './result'
 import { Token, TokenList, TokenType } from './tokenizer'
-import { Node, DocumentNode, TypeModifier, Position } from './ast'
+import { Node, DocumentNode, TypeModifier, Position, ConfigType } from './ast'
 import { PrismaParsingError } from './prisma-parsing-error'
 
 export function parse(source: string): DocumentNode {
@@ -9,6 +9,8 @@ export function parse(source: string): DocumentNode {
 
 type ParsingResult<T> = Result<T, PrismaParsingError>
 type RuleFunction<ReturnType> = (state: ParserState) => ParsingResult<ReturnType>
+
+type TupleToUnion<TupleType extends unknown[]> = TupleType[number]
 
 class ParserState {
   private tokenList: TokenList
@@ -119,7 +121,61 @@ const modelDefinition = defineNodeRule(
   }),
 )
 
-const document = defineNodeRule(takeUntil(modelDefinition, 'eof'), ([definitions, eof]) => ({
+const stringLiteral = defineNodeRule(token('string'), (token) => {
+  const value = token.token.replace(/^"/, '').replace(/"$/, '').replace(/\\"/g, '"')
+  return {
+    kind: 'StringLiteral',
+    value,
+    location: {
+      start: token.start,
+      end: token.end,
+    },
+  }
+})
+
+const booleanLiteral = defineNodeRule(
+  choice('Expected boolean value', keyword('true'), keyword('false')),
+  (keywordToken) => ({
+    kind: 'BooleanLiteral',
+    value: keywordToken.token === 'true' ? true : false,
+
+    location: {
+      start: keywordToken.start,
+      end: keywordToken.end,
+    },
+  }),
+)
+
+const value = choice('Expected value', stringLiteral, booleanLiteral)
+
+const configOption = defineNodeRule(sequence(identifier, token('='), value), ([key, , value]) => ({
+  kind: 'ConfigOption',
+  key,
+  value,
+  location: {
+    start: key.location.start,
+    end: value.location.end,
+  },
+}))
+
+const configType = choice('Expected generator or datasource keyword', keyword('datasource'), keyword('generator'))
+
+const configDefinition = defineNodeRule(
+  sequence(configType, identifier, token('{'), takeUntil(configOption, '}')),
+  ([configTypeToken, name, , [options, closingBrace]]) => ({
+    kind: 'ConfigDefinition',
+    type: configTypeToken.token as ConfigType,
+    name,
+    options,
+    location: {
+      start: configTypeToken.start,
+      end: closingBrace.end,
+    },
+  }),
+)
+
+const definition = choice('Expected config or model definition', modelDefinition, configDefinition)
+const document = defineNodeRule(takeUntil(definition, 'eof'), ([definitions, eof]) => ({
   kind: 'Document',
   definitions,
   location: {
@@ -140,6 +196,28 @@ function sequence<Elements extends unknown[]>(
     }
 
     return result as ParsingResult<Elements>
+  })
+}
+
+function choice<Elements extends unknown[]>(
+  defaultError: string,
+  ...ruleFunctions: { [K in keyof Elements]: RuleFunction<Elements[K]> }
+): RuleFunction<TupleToUnion<Elements>> {
+  return defineRule((state) => {
+    let result = state.error(defaultError, state.peek().start)
+    for (const rule of ruleFunctions) {
+      result = result.orElse((previousError) => {
+        return rule(state).orElse((nextError) => {
+          // report longest partial match as an error of choice operator
+          // chances are, that if one alternative matched more tokens that rule was users intention and this error will
+          // be more relevant
+          const errorToReport = nextError.position.offset > previousError.position.offset ? nextError : previousError
+          return err(errorToReport)
+        })
+      })
+    }
+
+    return result as ParsingResult<TupleToUnion<Elements>>
   })
 }
 

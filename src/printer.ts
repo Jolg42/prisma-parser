@@ -1,4 +1,18 @@
-import { DocumentNode, ModelDefinitionNode, FieldDefinitionNode, Node, TypeNode, AttributeNode } from './ast'
+import {
+  DocumentNode,
+  FieldDefinitionNode,
+  Node,
+  TypeNode,
+  AttributeNode,
+  DefinitionNode,
+  ModelDefinitionNode,
+  ConfigDefinitionNode,
+  ConfigOptionNode,
+  ValueNode,
+  BooleanLiteralNode,
+  StringLiteralNode,
+} from './ast'
+import { assertNever } from './util'
 
 const TAB_SIZE = 2
 
@@ -74,7 +88,20 @@ function printDocument(document: DocumentNode, printerState: PrinterState): void
   printerState.newLine()
 }
 
-function printDefinition(definition: ModelDefinitionNode, printerState: PrinterState): void {
+function printDefinition(definition: DefinitionNode, printerState: PrinterState): void {
+  switch (definition.kind) {
+    case 'ModelDefinition':
+      printModelDefinition(definition, printerState)
+      break
+    case 'ConfigDefinition':
+      printConfigDefinition(definition, printerState)
+      break
+    default:
+      assertNever(definition, 'Unexpected definition type')
+  }
+}
+
+function printModelDefinition(definition: ModelDefinitionNode, printerState: PrinterState): void {
   const typeOffset = getTypeAlignmentOffset(definition.fields)
   printerState
     .write('model ')
@@ -117,4 +144,45 @@ function printType(type: TypeNode, typeOffset: number, printerState: PrinterStat
 
 function printAttribute(attribute: AttributeNode, printerState: PrinterState): void {
   printerState.write(attribute.name)
+}
+
+function printConfigDefinition(definition: ConfigDefinitionNode, printerState: PrinterState): void {
+  printerState
+    .write(definition.type)
+    .write(' ')
+    .write(definition.name.identifier)
+    .write(' {')
+    .newLine()
+    .indent()
+    .writeNewlineSeparated(definition.options, printConfigOption)
+    .newLine()
+    .unindent()
+    .write('}')
+    .newLine()
+}
+
+function printConfigOption(option: ConfigOptionNode, printerState: PrinterState): void {
+  printerState.write(option.key.identifier).write(' = ')
+  printValue(option.value, printerState)
+}
+
+function printValue(value: ValueNode, printerState: PrinterState): void {
+  switch (value.kind) {
+    case 'BooleanLiteral':
+      printBooleanLiteral(value, printerState)
+      break
+    case 'StringLiteral':
+      printStringLiteral(value, printerState)
+      break
+    default:
+      assertNever(value, 'Unexpected value kind')
+  }
+}
+
+function printBooleanLiteral(literal: BooleanLiteralNode, printerState: PrinterState): void {
+  printerState.write(String(literal.value))
+}
+
+function printStringLiteral(literal: StringLiteralNode, printerState: PrinterState): void {
+  printerState.write('"').write(literal.value.replace(/"/g, '\\"')).write('"')
 }

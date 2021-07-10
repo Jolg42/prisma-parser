@@ -205,3 +205,169 @@ test('prints multiple fields while aligning the types', () => {
     }),
   ).toMatchSnapshot()
 })
+
+test('prints empty datasource definition', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'datasource',
+          name: { kind: 'Identifier', identifier: 'db1' },
+          options: [],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints empty generator definition', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'generator',
+          name: { kind: 'Identifier', identifier: 'client' },
+          options: [],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints boolean true option', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'datasource',
+          name: { kind: 'Identifier', identifier: 'db1' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option' },
+              value: {
+                kind: 'BooleanLiteral',
+                value: true,
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints boolean false option', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'datasource',
+          name: { kind: 'Identifier', identifier: 'db1' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option' },
+              value: {
+                kind: 'BooleanLiteral',
+                value: false,
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints string option', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'generator',
+          name: { kind: 'Identifier', identifier: 'client' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option' },
+              value: {
+                kind: 'StringLiteral',
+                value: 'option value',
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('correctly escapes quotes in string values', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'generator',
+          name: { kind: 'Identifier', identifier: 'client' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option' },
+              value: {
+                kind: 'StringLiteral',
+                value: 'option "value"',
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints multiple options', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'datasource',
+          name: { kind: 'Identifier', identifier: 'db1' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option1' },
+              value: {
+                kind: 'BooleanLiteral',
+                value: false,
+              },
+            },
+
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option2' },
+              value: {
+                kind: 'StringLiteral',
+                value: 'some option',
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
