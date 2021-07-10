@@ -143,6 +143,24 @@ describe('tokenization', () => {
     expect(tokens.advance().token).toBe('}')
   })
 
+  test('does not match on strings greedily', () => {
+    const tokens = new TokenList('"one" two "three"')
+    expect(tokens.advance()).toMatchObject({
+      type: 'string',
+      token: '"one"',
+    })
+
+    expect(tokens.advance()).toMatchObject({
+      type: 'identifier',
+      token: 'two',
+    })
+
+    expect(tokens.advance()).toMatchObject({
+      type: 'string',
+      token: '"three"',
+    })
+  })
+
   test('returns EOF token when stream is finished', () => {
     const tokens = new TokenList('foo')
     tokens.advance()
