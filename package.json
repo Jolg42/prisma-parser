@@ -9,7 +9,7 @@
     "typings"
   ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --project tsconfig.build.json",
     "test": "jest",
     "lint": "eslint . --ext ts",
     "prepare": "husky install",
