@@ -18,7 +18,7 @@ type TokenizationRule = {
 const tokenizationRules: TokenizationRule[] = [
   { type: 'identifier', pattern: /[a-zA-Z][a-zA-Z0-9]*/y },
   { type: 'attribute', pattern: /@[a-zA-Z][a-zA-Z0-9]*/y },
-  { type: 'string', pattern: /"([^"\\]|\\")*"/y },
+  { type: 'string', pattern: /"([^"\\]|\\.)*"/y },
   { type: '{', pattern: /{/y },
   { type: '}', pattern: /}/y },
   { type: '(', pattern: /\(/y },

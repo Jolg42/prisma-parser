@@ -45,6 +45,16 @@ describe('tokenization', () => {
     })
   })
 
+  test('allows to have \\ within a string', () => {
+    const tokens = new TokenList('"some \\ string"')
+    expect(tokens.advance()).toEqual({
+      type: 'string',
+      token: '"some \\ string"',
+      start: documentStart,
+      end: firstLinePosition(15),
+    })
+  })
+
   test('recognizes opening curly brace', () => {
     const tokens = new TokenList('{')
     expect(tokens.advance()).toEqual({
