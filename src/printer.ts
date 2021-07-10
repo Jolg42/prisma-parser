@@ -153,6 +153,9 @@ function printType(type: TypeNode, typeOffset: number, printerState: PrinterStat
 
 function printAttribute(attribute: AttributeNode, printerState: PrinterState): void {
   printerState.write(attribute.name)
+  if (attribute.arguments.length > 0) {
+    printerState.write('(').writeSeparated(attribute.arguments, ', ', printExpression).write(')')
+  }
 }
 
 function printConfigDefinition(definition: ConfigDefinitionNode, printerState: PrinterState): void {

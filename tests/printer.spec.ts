@@ -123,6 +123,46 @@ test('prints field attribute', () => {
                 {
                   kind: 'Attribute',
                   name: '@id',
+                  arguments: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints attribute with arguments', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ModelDefinition',
+          name: { kind: 'Identifier', identifier: 'Model' },
+          fields: [
+            {
+              kind: 'FieldDefinition',
+              name: { kind: 'Identifier', identifier: 'id' },
+              type: {
+                kind: 'Type',
+                name: { kind: 'Identifier', identifier: 'Int' },
+                modifier: 'none',
+              },
+              attributes: [
+                {
+                  kind: 'Attribute',
+                  name: '@id',
+                  arguments: [
+                    {
+                      kind: 'BooleanLiteral',
+                      value: true,
+                    },
+                    { kind: 'StringLiteral', value: 'foo' },
+                    { kind: 'FunctionCall', name: { kind: 'Identifier', identifier: 'func' }, arguments: [] },
+                  ],
                 },
               ],
             },
@@ -154,11 +194,13 @@ test('prints multiple attributes', () => {
                 {
                   kind: 'Attribute',
                   name: '@first',
+                  arguments: [],
                 },
 
                 {
                   kind: 'Attribute',
                   name: '@second',
+                  arguments: [],
                 },
               ],
             },

@@ -4,7 +4,7 @@ export interface Result<T, Err extends Error> {
 
   map<U>(mapper: (value: T) => U): Result<U, Err>
   flatMap<U>(mapper: (value: T) => Result<U, Err>): Result<U, Err>
-  orElse(mapper: (error: Err) => Result<T, Err>): Result<T, Err>
+  orElse<U = T>(mapper: (error: Err) => Result<U, Err>): Result<U, Err>
 
   unwrap(): T
 }
@@ -28,8 +28,8 @@ class ResultOk<T, Err extends Error> implements Result<T, Err> {
     return mapper(this.value)
   }
 
-  orElse(): Result<T, Err> {
-    return ok(this.value)
+  orElse<U = T>(): Result<U, Err> {
+    return ok(this.value) as unknown as Result<U, Err>
   }
 
   unwrap(): T {
@@ -59,7 +59,7 @@ class ResultErr<T, Err extends Error> implements Result<T, Err> {
     return new ResultErr(this.error)
   }
 
-  orElse(mapper: (error: Err) => Result<T, Err>): Result<T, Err> {
+  orElse<U = T>(mapper: (error: Err) => Result<U, Err>): Result<U, Err> {
     return mapper(this.error)
   }
 

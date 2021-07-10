@@ -80,9 +80,51 @@ test('parses attribute', () => {
   }`)
 
   expectModelDefinition(doc.definitions[0])
-  expect(doc.definitions[0].fields[0].attributes).toHaveLength(1)
-  const attribute = doc.definitions[0].fields[0].attributes[0]
-  expect(attribute.name).toBe('@id')
+  expect(doc.definitions[0].fields[0].attributes).toMatchObject([{ kind: 'Attribute', name: '@id', arguments: [] }])
+})
+
+test('parses attribute with empty arguments list', () => {
+  const doc = parse(`
+  model Foo {
+      id Int @id()
+  }`)
+
+  expectModelDefinition(doc.definitions[0])
+  expect(doc.definitions[0].fields[0].attributes).toMatchObject([{ kind: 'Attribute', name: '@id', arguments: [] }])
+})
+
+test('parses attribute with one argument', () => {
+  const doc = parse(`
+  model Foo {
+      id Int @id(true)
+  }`)
+
+  expectModelDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].fields[0].attributes).toMatchObject([
+    { kind: 'Attribute', name: '@id', arguments: [{ kind: 'BooleanLiteral', value: true }] },
+  ])
+})
+
+test('parses attribute with several arguments', () => {
+  const doc = parse(`
+  model Foo {
+      id Int @id(true, "foo", func())
+  }`)
+
+  expectModelDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].fields[0].attributes).toMatchObject([
+    {
+      kind: 'Attribute',
+      name: '@id',
+      arguments: [
+        { kind: 'BooleanLiteral', value: true },
+        { kind: 'StringLiteral', value: 'foo' },
+        { kind: 'FunctionCall', name: { identifier: 'func' }, arguments: [] },
+      ],
+    },
+  ])
 })
 
 test('parses multiple attributes', () => {
@@ -243,6 +285,120 @@ test('correctly unescapes the quotes in string literal', () => {
   ])
 })
 
+test('parses function calls without arguments', () => {
+  const doc = parse(`
+  generator client {
+    option = func()
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option' },
+      value: {
+        kind: 'FunctionCall',
+        name: { identifier: 'func' },
+        arguments: [],
+      },
+    },
+  ])
+})
+
+test('parses function calls with single argument', () => {
+  const doc = parse(`
+  generator client {
+    option = func("foo")
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option' },
+      value: {
+        kind: 'FunctionCall',
+        name: { identifier: 'func' },
+        arguments: [
+          {
+            kind: 'StringLiteral',
+            value: 'foo',
+          },
+        ],
+      },
+    },
+  ])
+})
+
+test('parses function calls with multiple arguments', () => {
+  const doc = parse(`
+  generator client {
+    option = func("foo", true)
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option' },
+      value: {
+        kind: 'FunctionCall',
+        name: { identifier: 'func' },
+        arguments: [
+          {
+            kind: 'StringLiteral',
+            value: 'foo',
+          },
+
+          {
+            kind: 'BooleanLiteral',
+            value: true,
+          },
+        ],
+      },
+    },
+  ])
+})
+
+test('parses nested function calls', () => {
+  const doc = parse(`
+  generator client {
+    option = outer(inner(true))
+  }
+  `)
+
+  expectConfigDefinition(doc.definitions[0])
+
+  expect(doc.definitions[0].options).toMatchObject([
+    {
+      kind: 'ConfigOption',
+      key: { identifier: 'option' },
+      value: {
+        kind: 'FunctionCall',
+        name: { identifier: 'outer' },
+        arguments: [
+          {
+            kind: 'FunctionCall',
+            name: { identifier: 'inner' },
+            arguments: [
+              {
+                kind: 'BooleanLiteral',
+                value: true,
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ])
+})
+
 test('parses multiple options', () => {
   const doc = parse(`
   datasource db1 {
@@ -341,6 +497,16 @@ describe('errors', () => {
       parse(`
       datasource db1 {
         option =
+      }
+        `),
+    )
+  })
+
+  test('throws error on incomplete function call', () => {
+    expectParsingError(() =>
+      parse(`
+      datasource db1 {
+        option = func(
       }
         `),
     )

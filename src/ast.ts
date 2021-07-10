@@ -99,4 +99,5 @@ export type AttributeNode = {
   kind: 'Attribute'
   name: string
   location?: Location
+  arguments: ExpressionNode[]
 }

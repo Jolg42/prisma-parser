@@ -1,6 +1,6 @@
 import { Result, ok, err } from './result'
 import { Token, TokenList, TokenType } from './tokenizer'
-import { Node, DocumentNode, TypeModifier, Position, ConfigType } from './ast'
+import { DocumentNode, TypeModifier, Position, ConfigType, FunctionCallNode, ExpressionNode } from './ast'
 import { PrismaParsingError } from './prisma-parsing-error'
 
 type ParsingResult<T> = Result<T, PrismaParsingError>
@@ -42,10 +42,10 @@ class ParserState {
   }
 }
 
-const document = defineNodeRule(
+const document = mapRuleResult(
   () => takeUntil(definition, 'eof'),
-  ([definitions, eof]) => ({
-    kind: 'Document',
+  ([definitions, eof]): DocumentNode => ({
+    kind: 'Document' as const,
     definitions,
     location: {
       start: definitions[0]?.location.start ?? 0,
@@ -56,7 +56,7 @@ const document = defineNodeRule(
 
 const definition = defineRule(() => choice('Expected config or model definition', modelDefinition, configDefinition))
 
-const modelDefinition = defineNodeRule(
+const modelDefinition = mapRuleResult(
   () =>
     sequence(
       keyword('model'),
@@ -65,7 +65,7 @@ const modelDefinition = defineNodeRule(
       takeUntil(fieldDefinition, '}'),
     ),
   ([modelKeyword, name, , [fields, closeBrace]]) => ({
-    kind: 'ModelDefinition',
+    kind: 'ModelDefinition' as const,
     name,
     fields,
     location: {
@@ -75,12 +75,12 @@ const modelDefinition = defineNodeRule(
   }),
 )
 
-const fieldDefinition = defineNodeRule(
+const fieldDefinition = mapRuleResult(
   () => sequence(changeErrorMessage(identifier, 'Expected field name'), type, zeroOrMore(attribute)),
   ([name, type, attributes]) => {
     const end = attributes.length > 0 ? attributes[attributes.length - 1].location.end : type.location.end
     return {
-      kind: 'FieldDefinition',
+      kind: 'FieldDefinition' as const,
       name,
       type,
       attributes,
@@ -92,48 +92,54 @@ const fieldDefinition = defineNodeRule(
   },
 )
 
-const type = defineNodeRule(
-  () => sequence(changeErrorMessage(identifier, 'Expected field type'), typeModifierToken),
-  ([name, modifierToken]) => {
-    let modifier: TypeModifier = 'none'
-    let end = name.location.end
-    if (modifierToken) {
-      end = modifierToken.end
-      modifier = modifierToken?.type === '[]' ? 'array' : 'optional'
-    }
-
+const type = mapRuleResult(
+  () => sequence(changeErrorMessage(identifier, 'Expected field type'), typeModifier),
+  ([name, [modifier, modifierToken]]) => {
     return {
-      kind: 'Type',
+      kind: 'Type' as const,
       name,
       modifier,
       location: {
         start: name.location.start,
-        end,
+        end: modifierToken ? modifierToken.end : name.location.end,
       },
     }
   },
 )
 
-const typeModifierToken = defineRule<Token | null>(() => (state) => {
-  return (optionalToken(state) as ParsingResult<Token | null>).orElse(() => arrayToken(state)).orElse(() => ok(null))
-})
-
-const attribute = defineNodeRule(
-  () => token('attribute'),
-  (token) => ({
-    kind: 'Attribute',
-    name: token.token,
-    location: {
-      start: token.start,
-      end: token.end,
-    },
-  }),
+const typeModifier = mapRuleResult(
+  () => optional(choice('Expected type modifier', token('?'), token('[]'))),
+  (token): [TypeModifier, Token | null] => {
+    if (!token) {
+      return ['none', null]
+    }
+    if (token.token === '?') {
+      return ['optional', token]
+    }
+    return ['array', token]
+  },
 )
 
-const configDefinition = defineNodeRule(
+const attribute = mapRuleResult(
+  () => sequence(token('attribute'), optional(argumentsList)),
+  ([token, argumentsList]) => {
+    const [args, endToken] = argumentsList ?? [[], token]
+    return {
+      kind: 'Attribute' as const,
+      name: token.token,
+      arguments: args,
+      location: {
+        start: token.start,
+        end: endToken.end,
+      },
+    }
+  },
+)
+
+const configDefinition = mapRuleResult(
   () => sequence(configType, identifier, token('{'), takeUntil(configOption, '}')),
   ([configTypeToken, name, , [options, closingBrace]]) => ({
-    kind: 'ConfigDefinition',
+    kind: 'ConfigDefinition' as const,
     type: configTypeToken.token as ConfigType,
     name,
     options,
@@ -148,10 +154,10 @@ const configType = defineRule(() =>
   choice('Expected generator or datasource keyword', keyword('datasource'), keyword('generator')),
 )
 
-const configOption = defineNodeRule(
+const configOption = mapRuleResult(
   () => sequence(identifier, token('='), expression),
   ([key, , value]) => ({
-    kind: 'ConfigOption',
+    kind: 'ConfigOption' as const,
     key,
     value,
     location: {
@@ -161,14 +167,14 @@ const configOption = defineNodeRule(
   }),
 )
 
-const expression = defineRule(() => choice('Expected expression', stringLiteral, booleanLiteral))
+const expression = defineRule(() => choice('Expected expression', functionCall, stringLiteral, booleanLiteral))
 
-const stringLiteral = defineNodeRule(
+const stringLiteral = mapRuleResult(
   () => token('string'),
   (token) => {
     const value = token.token.replace(/^"/, '').replace(/"$/, '').replace(/\\"/g, '"')
     return {
-      kind: 'StringLiteral',
+      kind: 'StringLiteral' as const,
       value,
       location: {
         start: token.start,
@@ -178,10 +184,10 @@ const stringLiteral = defineNodeRule(
   },
 )
 
-const booleanLiteral = defineNodeRule(
+const booleanLiteral = mapRuleResult(
   () => choice('Expected boolean value', keyword('true'), keyword('false')),
   (keywordToken) => ({
-    kind: 'BooleanLiteral',
+    kind: 'BooleanLiteral' as const,
     value: keywordToken.token === 'true' ? true : false,
 
     location: {
@@ -191,10 +197,28 @@ const booleanLiteral = defineNodeRule(
   }),
 )
 
-const identifier = defineNodeRule(
+const functionCall: RuleFunction<Required<FunctionCallNode>> = mapRuleResult(
+  () => sequence(identifier, argumentsList),
+  ([name, [args, closeBrace]]) => ({
+    kind: 'FunctionCall' as const,
+    name,
+    arguments: args,
+    location: {
+      start: name.location.start,
+      end: closeBrace.end,
+    },
+  }),
+)
+
+const argumentsList: RuleFunction<[ExpressionNode[], Token]> = mapRuleResult(
+  () => sequence(token('('), zeroOrMoreSeparated(expression, token(',')), token(')')),
+  ([, args, closingBrace]) => [args, closingBrace],
+)
+
+const identifier = mapRuleResult(
   () => token('identifier'),
   (token) => ({
-    kind: 'Identifier',
+    kind: 'Identifier' as const,
     identifier: token.token,
     location: {
       start: token.start,
@@ -240,6 +264,12 @@ function choice<Elements extends unknown[]>(
   })
 }
 
+function optional<ReturnType>(rule: RuleFunction<ReturnType>): RuleFunction<ReturnType | null> {
+  return defineRule(() => (state) => {
+    return rule(state).orElse(() => ok(null))
+  })
+}
+
 function takeUntil<ReturnType>(
   elementRule: RuleFunction<ReturnType>,
   tokenType: TokenType,
@@ -267,14 +297,25 @@ function zeroOrMore<ReturnType>(elementRule: RuleFunction<ReturnType>): RuleFunc
   })
 }
 
-const identiferToken = token('identifier')
-const arrayToken = token('[]')
-const optionalToken = token('?')
+function zeroOrMoreSeparated<ReturnType>(
+  elementRule: RuleFunction<ReturnType>,
+  separatorRule: RuleFunction<unknown>,
+): RuleFunction<ReturnType[]> {
+  return defineRule(() => (state) => {
+    const result: ReturnType[] = []
+    let ruleResult = elementRule(state)
+    while (ruleResult.isOk()) {
+      result.push(ruleResult.unwrap())
+      ruleResult = separatorRule(state).flatMap(() => elementRule(state))
+    }
+    return ok(result)
+  })
+}
 
 const keyword = (keywordName: string): RuleFunction<Token> => {
   return defineRule(() => (state) => {
     return identiferToken(state)
-      .orElse((error) => state.error(`Expected keyword ${keywordName}`, error.position))
+      .orElse<Token>((error) => state.error(`Expected keyword ${keywordName}`, error.position))
       .flatMap((token) => {
         if (token.token !== keywordName) {
           return state.error(`Expected keyword ${keywordName}`, token.start)
@@ -283,6 +324,8 @@ const keyword = (keywordName: string): RuleFunction<Token> => {
       })
   })
 }
+
+const identiferToken = token('identifier')
 
 function token(tokenType: TokenType): RuleFunction<Token> {
   return defineRule(() => (state) => {
@@ -294,13 +337,10 @@ function token(tokenType: TokenType): RuleFunction<Token> {
   })
 }
 
-function defineNodeRule<T, NodeType extends Node>(
-  ruleFactory: () => RuleFunction<T>,
-  toNodeFn: (result: T) => NodeType,
-): RuleFunction<NodeType> {
+function mapRuleResult<T, U>(ruleFactory: () => RuleFunction<T>, mapper: (result: T) => U): RuleFunction<U> {
   return defineRule(() => {
     const ruleFn = ruleFactory()
-    return (state) => ruleFn(state).map(toNodeFn)
+    return (state) => ruleFn(state).map(mapper)
   })
 }
 
