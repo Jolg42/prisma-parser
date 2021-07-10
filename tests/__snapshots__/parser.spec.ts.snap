@@ -44,7 +44,7 @@ exports[`errors throws error on missing { 1`] = `
 `;
 
 exports[`errors throws error on missing config value 1`] = `
-"PrismaParsingError: Expected value
+"PrismaParsingError: Expected expression
 
   2 |       datasource db1 {
   3 |         option =

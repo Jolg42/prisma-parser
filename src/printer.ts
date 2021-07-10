@@ -8,9 +8,10 @@ import {
   ModelDefinitionNode,
   ConfigDefinitionNode,
   ConfigOptionNode,
-  ValueNode,
+  ExpressionNode,
   BooleanLiteralNode,
   StringLiteralNode,
+  FunctionCallNode,
 } from './ast'
 import { assertNever } from './util'
 
@@ -57,13 +58,21 @@ class PrinterState {
     return this
   }
 
-  writeNewlineSeparated<NodeType extends Node>(nodes: NodeType[], printNode: PrintFunction<NodeType>): this {
+  writeSeparated<NodeType extends Node>(
+    nodes: NodeType[],
+    separator: string,
+    printNode: PrintFunction<NodeType>,
+  ): this {
     if (nodes.length === 0) {
       return this
     }
     printNode(nodes[0], this)
     for (let i = 1; i < nodes.length; i++) {
-      this.newLine()
+      if (separator === '\n') {
+        this.newLine()
+      } else {
+        this.write(separator)
+      }
       printNode(nodes[i], this)
     }
     return this
@@ -84,7 +93,7 @@ export function print(document: DocumentNode): string {
 }
 
 function printDocument(document: DocumentNode, printerState: PrinterState): void {
-  printerState.writeNewlineSeparated(document.definitions, printDefinition)
+  printerState.writeSeparated(document.definitions, '\n', printDefinition)
   printerState.newLine()
 }
 
@@ -109,7 +118,7 @@ function printModelDefinition(definition: ModelDefinitionNode, printerState: Pri
     .write(' {')
     .newLine()
     .indent()
-    .writeNewlineSeparated(definition.fields, (field) => {
+    .writeSeparated(definition.fields, '\n', (field) => {
       printField(field, typeOffset, printerState)
     })
     .newLine()
@@ -154,7 +163,7 @@ function printConfigDefinition(definition: ConfigDefinitionNode, printerState: P
     .write(' {')
     .newLine()
     .indent()
-    .writeNewlineSeparated(definition.options, printConfigOption)
+    .writeSeparated(definition.options, '\n', printConfigOption)
     .newLine()
     .unindent()
     .write('}')
@@ -163,19 +172,22 @@ function printConfigDefinition(definition: ConfigDefinitionNode, printerState: P
 
 function printConfigOption(option: ConfigOptionNode, printerState: PrinterState): void {
   printerState.write(option.key.identifier).write(' = ')
-  printValue(option.value, printerState)
+  printExpression(option.value, printerState)
 }
 
-function printValue(value: ValueNode, printerState: PrinterState): void {
-  switch (value.kind) {
+function printExpression(expression: ExpressionNode, printerState: PrinterState): void {
+  switch (expression.kind) {
     case 'BooleanLiteral':
-      printBooleanLiteral(value, printerState)
+      printBooleanLiteral(expression, printerState)
       break
     case 'StringLiteral':
-      printStringLiteral(value, printerState)
+      printStringLiteral(expression, printerState)
+      break
+    case 'FunctionCall':
+      printFunctionCall(expression, printerState)
       break
     default:
-      assertNever(value, 'Unexpected value kind')
+      assertNever(expression, 'Unexpected value kind')
   }
 }
 
@@ -185,4 +197,8 @@ function printBooleanLiteral(literal: BooleanLiteralNode, printerState: PrinterS
 
 function printStringLiteral(literal: StringLiteralNode, printerState: PrinterState): void {
   printerState.write('"').write(literal.value.replace(/"/g, '\\"')).write('"')
+}
+
+function printFunctionCall(call: FunctionCallNode, printerState: PrinterState): void {
+  printerState.write(call.name.identifier).write('(').writeSeparated(call.arguments, ', ', printExpression).write(')')
 }

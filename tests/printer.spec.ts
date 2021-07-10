@@ -338,6 +338,141 @@ test('correctly escapes quotes in string values', () => {
   ).toMatchSnapshot()
 })
 
+test('prints function call option', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'generator',
+          name: { kind: 'Identifier', identifier: 'client' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option' },
+              value: {
+                kind: 'FunctionCall',
+                name: { kind: 'Identifier', identifier: 'func' },
+                arguments: [],
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints function call with argument', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'generator',
+          name: { kind: 'Identifier', identifier: 'client' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option' },
+              value: {
+                kind: 'FunctionCall',
+                name: { kind: 'Identifier', identifier: 'func' },
+                arguments: [
+                  {
+                    kind: 'StringLiteral',
+                    value: 'function argument',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints function call with multiple arguments', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'generator',
+          name: { kind: 'Identifier', identifier: 'client' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option' },
+              value: {
+                kind: 'FunctionCall',
+                name: { kind: 'Identifier', identifier: 'func' },
+                arguments: [
+                  {
+                    kind: 'StringLiteral',
+                    value: 'function argument',
+                  },
+
+                  {
+                    kind: 'BooleanLiteral',
+                    value: true,
+                  },
+
+                  {
+                    kind: 'BooleanLiteral',
+                    value: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
+test('prints nested function call', () => {
+  expect(
+    print({
+      kind: 'Document',
+      definitions: [
+        {
+          kind: 'ConfigDefinition',
+          type: 'generator',
+          name: { kind: 'Identifier', identifier: 'client' },
+          options: [
+            {
+              kind: 'ConfigOption',
+              key: { kind: 'Identifier', identifier: 'option' },
+              value: {
+                kind: 'FunctionCall',
+                name: { kind: 'Identifier', identifier: 'outer' },
+                arguments: [
+                  {
+                    kind: 'FunctionCall',
+                    name: { kind: 'Identifier', identifier: 'inner' },
+                    arguments: [
+                      {
+                        kind: 'StringLiteral',
+                        value: 'parameter',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  ).toMatchSnapshot()
+})
+
 test('prints multiple options', () => {
   expect(
     print({

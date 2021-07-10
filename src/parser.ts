@@ -146,9 +146,9 @@ const booleanLiteral = defineNodeRule(
   }),
 )
 
-const value = choice('Expected value', stringLiteral, booleanLiteral)
+const expression = choice('Expected expression', stringLiteral, booleanLiteral)
 
-const configOption = defineNodeRule(sequence(identifier, token('='), value), ([key, , value]) => ({
+const configOption = defineNodeRule(sequence(identifier, token('='), expression), ([key, , value]) => ({
   kind: 'ConfigOption',
   key,
   value,

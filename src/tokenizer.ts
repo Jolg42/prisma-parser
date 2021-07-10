@@ -1,15 +1,13 @@
 import { Position } from './ast'
 import { PrismaParsingError } from './prisma-parsing-error'
 
-export type TokenType = 'identifier' | 'attribute' | 'string' | 'eof' | '{' | '}' | '[]' | '?' | '='
+export type TokenType = 'identifier' | 'attribute' | 'string' | 'eof' | '{' | '}' | '(' | ')' | ',' | '[]' | '?' | '='
 
 export type Token = {
   type: TokenType
   token: string
   start: Position
   end: Position
-  // start: number
-  // end: number
 }
 
 type TokenizationRule = {
@@ -26,6 +24,9 @@ const tokenizationRules: TokenizationRule[] = [
   { type: 'string', pattern: /"([^"]|\")*"/y },
   { type: '{', pattern: /{/y },
   { type: '}', pattern: /}/y },
+  { type: '(', pattern: /\(/y },
+  { type: ')', pattern: /\)/y },
+  { type: ',', pattern: /,/y },
   { type: '?', pattern: /\?/y },
   { type: '=', pattern: /=/y },
   { type: '[]', pattern: /\[]/y },

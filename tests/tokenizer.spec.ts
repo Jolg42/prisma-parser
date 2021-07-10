@@ -65,6 +65,36 @@ describe('tokenization', () => {
     })
   })
 
+  test('recognizes opening round brace', () => {
+    const tokens = new TokenList('(')
+    expect(tokens.advance()).toEqual({
+      type: '(',
+      token: '(',
+      start: documentStart,
+      end: firstLinePosition(1),
+    })
+  })
+
+  test('recognizes closing round brace', () => {
+    const tokens = new TokenList(')')
+    expect(tokens.advance()).toEqual({
+      type: ')',
+      token: ')',
+      start: documentStart,
+      end: firstLinePosition(1),
+    })
+  })
+
+  test('recognizes comma', () => {
+    const tokens = new TokenList(',')
+    expect(tokens.advance()).toEqual({
+      type: ',',
+      token: ',',
+      start: documentStart,
+      end: firstLinePosition(1),
+    })
+  })
+
   test('recognizes square braces', () => {
     const tokens = new TokenList('[]')
     expect(tokens.advance()).toEqual({ type: '[]', token: '[]', start: documentStart, end: firstLinePosition(2) })

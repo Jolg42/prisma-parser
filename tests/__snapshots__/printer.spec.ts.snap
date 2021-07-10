@@ -72,6 +72,27 @@ exports[`prints field with optional type 1`] = `
 "
 `;
 
+exports[`prints function call option 1`] = `
+"generator client {
+  option = func()
+}
+"
+`;
+
+exports[`prints function call with argument 1`] = `
+"generator client {
+  option = func(\\"function argument\\")
+}
+"
+`;
+
+exports[`prints function call with multiple arguments 1`] = `
+"generator client {
+  option = func(\\"function argument\\", true, false)
+}
+"
+`;
+
 exports[`prints multiple attributes 1`] = `
 "model Model {
   field  Int @first @second
@@ -91,6 +112,13 @@ exports[`prints multiple options 1`] = `
 "datasource db1 {
   option1 = false
   option2 = \\"some option\\"
+}
+"
+`;
+
+exports[`prints nested function call 1`] = `
+"generator client {
+  option = outer(inner(\\"parameter\\"))
 }
 "
 `;

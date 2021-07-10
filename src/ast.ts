@@ -6,7 +6,7 @@ export type Node =
   | IdentifierNode
   | AttributeNode
   | ConfigOptionNode
-  | ValueNode
+  | ExpressionNode
 
 export type Position = {
   line: number
@@ -40,11 +40,11 @@ export type ConfigType = 'datasource' | 'generator'
 export type ConfigOptionNode = {
   kind: 'ConfigOption'
   key: IdentifierNode
-  value: ValueNode
+  value: ExpressionNode
   location?: Location
 }
 
-export type ValueNode = StringLiteralNode | BooleanLiteralNode
+export type ExpressionNode = StringLiteralNode | BooleanLiteralNode | FunctionCallNode
 
 export type StringLiteralNode = {
   kind: 'StringLiteral'
@@ -55,6 +55,13 @@ export type StringLiteralNode = {
 export type BooleanLiteralNode = {
   kind: 'BooleanLiteral'
   value: boolean
+  location?: Location
+}
+
+export type FunctionCallNode = {
+  kind: 'FunctionCall'
+  name: IdentifierNode
+  arguments: ExpressionNode[]
   location?: Location
 }
 
