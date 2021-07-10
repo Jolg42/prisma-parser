@@ -204,8 +204,16 @@ describe('pointer manipulation methods', () => {
     })
   })
 
-  test('.restorePointer throws if trying to go beyond currently computed tokens', () => {
+  test('.restorePointer allows to move pointer to the first not yet computed token', () => {
     const tokens = new TokenList('foo')
-    expect(() => tokens.restorePointer(9000)).toThrow('Attempt to set pointer to a not yet computed toke')
+    tokens.advance()
+    tokens.restorePointer(0)
+
+    expect(() => tokens.restorePointer(1)).not.toThrow()
+  })
+
+  test('.restorePointer throws if trying to go beyond next not computed token', () => {
+    const tokens = new TokenList('foo')
+    expect(() => tokens.restorePointer(9000)).toThrow('Attempt to set pointer to a not yet computed token')
   })
 })

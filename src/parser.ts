@@ -8,6 +8,11 @@ type RuleFunction<ReturnType> = (state: ParserState) => ParsingResult<ReturnType
 
 type TupleToUnion<TupleType extends unknown[]> = TupleType[number]
 
+type RuleCacheRecord<ReturnType> = {
+  result: ParsingResult<ReturnType>
+  pointer: number
+}
+
 export function parse(source: string): DocumentNode {
   return document(new ParserState(source)).unwrap()
 }
@@ -39,6 +44,29 @@ class ParserState {
 
   error<T>(message: string, position: Position): ParsingResult<T> {
     return err(new PrismaParsingError(message, this.source, position))
+  }
+}
+
+class RuleResultCache<ResultType> {
+  private caches: WeakMap<ParserState, Map<number, RuleCacheRecord<ResultType>>> = new WeakMap()
+
+  getOrCreate(state: ParserState, creatorFunction: () => ParsingResult<ResultType>): ParsingResult<ResultType> {
+    let stateCache = this.caches.get(state)
+    if (!stateCache) {
+      stateCache = new Map()
+      this.caches.set(state, stateCache)
+    }
+    const pointer = state.getPointer()
+    const cacheRecord = stateCache.get(pointer)
+    if (cacheRecord) {
+      // restore pointer to the value if it moved
+      // after cached match
+      state.restorePointer(cacheRecord.pointer)
+      return cacheRecord.result
+    }
+    const result = creatorFunction()
+    stateCache.set(pointer, { result, pointer: state.getPointer() })
+    return result
   }
 }
 
@@ -352,15 +380,18 @@ function changeErrorMessage<T>(ruleFn: RuleFunction<T>, message: string): RuleFu
 
 function defineRule<ReturnType>(ruleFactory: () => RuleFunction<ReturnType>): RuleFunction<ReturnType> {
   let ruleFn: RuleFunction<ReturnType> | null = null
-  return (state) => {
-    if (!ruleFn) {
-      ruleFn = ruleFactory()
-    }
-    const position = state.getPointer()
-    const result = ruleFn(state)
-    if (result.isError()) {
-      state.restorePointer(position)
-    }
-    return result
-  }
+
+  const cache = new RuleResultCache<ReturnType>()
+  return (state) =>
+    cache.getOrCreate(state, () => {
+      if (!ruleFn) {
+        ruleFn = ruleFactory()
+      }
+      const position = state.getPointer()
+      const result = ruleFn(state)
+      if (result.isError()) {
+        state.restorePointer(position)
+      }
+      return result
+    })
 }

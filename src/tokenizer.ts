@@ -115,7 +115,7 @@ export class TokenList {
   }
 
   restorePointer(pointer: number): void {
-    if (pointer >= this.computedTokens.length) {
+    if (pointer > this.computedTokens.length) {
       throw new Error('Attempt to set pointer to a not yet computed token')
     }
 
